@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="ファミレコ アイコン">
+<title>ファミレコ アイコン</title>
+<rect width="240" height="240" rx="54" fill="#15132B"/><g transform="translate(0 -14) scale(1)"><line x1="22" y1="70" x2="218" y2="70" stroke="#3A3670" stroke-width="5" stroke-linecap="round"/>
+<line x1="22" y1="98" x2="218" y2="98" stroke="#3A3670" stroke-width="5" stroke-linecap="round"/>
+<line x1="22" y1="126" x2="218" y2="126" stroke="#3A3670" stroke-width="5" stroke-linecap="round"/>
+<line x1="22" y1="154" x2="218" y2="154" stroke="#3A3670" stroke-width="5" stroke-linecap="round"/>
+<line x1="22" y1="182" x2="218" y2="182" stroke="#3A3670" stroke-width="5" stroke-linecap="round"/>
+<line x1="85" y1="164.0" x2="85" y2="70.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="66" cy="168.0" rx="24" ry="18" transform="rotate(-20 66 168.0)" fill="#FF9F5A"/>
+<circle cx="60" cy="166.0" r="3" fill="#15132B"/><circle cx="73" cy="164.0" r="3" fill="#15132B"/>
+<path d="M59 172.0 Q67 179.0 74 170.0" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="139" y1="178" x2="139" y2="84.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="120" cy="182" rx="24" ry="18" transform="rotate(-20 120 182)" fill="#5CC8FF"/>
+<circle cx="114" cy="180" r="3" fill="#15132B"/><circle cx="127" cy="178" r="3" fill="#15132B"/>
+<path d="M113 186 Q121 193 128 184" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="193" y1="192.0" x2="193" y2="98.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="174" cy="196.0" rx="24" ry="18" transform="rotate(-20 174 196.0)" fill="#FF7EB6"/>
+<circle cx="168" cy="194.0" r="3" fill="#15132B"/><circle cx="181" cy="192.0" r="3" fill="#15132B"/>
+<path d="M167 200.0 Q175 207.0 182 198.0" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M81.5 64 L196.5 92.9 L196.5 110.9 L81.5 82 Z" fill="#C6F432" stroke="#C6F432" stroke-width="2" stroke-linejoin="round"/></g>
+</svg>

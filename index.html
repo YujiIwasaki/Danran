@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ファミレコ プロトタイプ</title>
 <meta name="description" content="親子の会話を習慣にする「ファミレコ」のプロトタイプ。お題ルーレット、盛り上がりスコア、グラレコ、月次ショートアニメ。">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Yomogi&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
@@ -21,12 +23,13 @@ button:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
 .phone{width:390px;height:844px;background:var(--ink);border-radius:44px;border:1px solid #2E2A5C;box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;position:relative}
 .bar{display:flex;align-items:center;gap:10px;padding:18px 20px 10px;min-height:64px}
 .bar h1{margin:0;font-family:'Dela Gothic One',sans-serif;font-weight:400;font-size:21px;letter-spacing:.5px}
+.bar svg+h1{font-size:23px}
 .iconbtn{width:44px;height:44px;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo{width:32px;height:32px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 main{flex:1;overflow-y:auto;padding:8px 20px 28px}
 .col{display:flex;flex-direction:column;gap:16px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}
 .muted{color:var(--muted)}
+.unit{font-family:"Zen Kaku Gothic New",sans-serif;font-size:14px;font-weight:700}
 .disp{font-family:'Dela Gothic One',sans-serif;font-weight:400}
 .label{margin:0;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime)}
 h2{margin:0;font-size:16px;font-weight:900}
@@ -175,8 +178,8 @@ V.home = function () {
   if (!isSub()) h += '<p class="muted" style="font-size:14px;text-align:center">無料プラン：今月のこり <strong style="color:var(--lime);font-weight:900">' + S.freeLeft + ' / 4 回</strong></p>';
   h += '<button class="btn big" data-a="start" style="display:flex;align-items:center;justify-content:center;gap:10px">トークを はじめる ' + svg('arrow', 22, null, 2.8) + '</button>';
   h += '<section class="grid2">' +
-    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">' + svg('flame', 16, '#FF9F5A') + '今月 話した回数</p><p class="disp" style="font-size:30px">' + (S.saved ? 4 : 3) + '<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 回</span></p></div>' +
-    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C6F432" aria-hidden="true">' + ICON.star + '</svg>家族スコア 平均</p><p class="disp" style="font-size:30px">78<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 点</span></p></div></section>';
+    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">' + svg('flame', 16, '#FF9F5A') + '今月 話した回数</p><p class="disp" style="font-size:30px">' + (S.saved ? 4 : 3) + '<span class="muted unit"> 回</span></p></div>' +
+    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C6F432" aria-hidden="true">' + ICON.star + '</svg>家族スコア 平均</p><p class="disp" style="font-size:30px">78<span class="muted unit"> 点</span></p></div></section>';
   h += '<section class="col" style="gap:10px"><h2>さいきんの グラレコ</h2>' + (S.saved ? rowRec('vr') : '') + rowRec('suki') + (S.saved ? '' : rowRec('shoot')) + '</section></div>';
   return h;
 };
@@ -366,8 +369,7 @@ function render() {
   var backTo = { members: 'home', roulette: 'members', grareco: 'result', anime: 'album', photo: S.photoFrom, pin: 'home' }[scr];
   var showNav = scr === 'home' || scr === 'album' || scr === 'pin' || scr === 'parent';
   var h = '<header class="bar">' + (backTo ? '<button class="iconbtn" data-a="back" aria-label="もどる">' + svg('back', 20, null, 2.5) + '</button>' : '') +
-    (scr === 'home' ? '<span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 4v-4H6a2 2 0 0 1-2-2z"/><path d="M9 10h.01M12 10h.01M15 10h.01" stroke-width="3"/></svg></span>' : '') +
-    '<h1>' + TITLES[scr] + '</h1></header><main id="main">' + V[scr]() + '</main>';
+    (scr === 'home' ? '<svg aria-hidden="true" width="40" height="40" viewBox="38 46 164 160" style="flex-shrink:0"><g transform="translate(0 -14) scale(1)"><line x1="85" y1="164.0" x2="85" y2="70.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/><ellipse cx="66" cy="168.0" rx="24" ry="18" transform="rotate(-20 66 168.0)" fill="#FF9F5A"/><circle cx="60" cy="166.0" r="3" fill="#15132B"/><circle cx="73" cy="164.0" r="3" fill="#15132B"/><path d="M59 172.0 Q67 179.0 74 170.0" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/><line x1="139" y1="178" x2="139" y2="84.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/><ellipse cx="120" cy="182" rx="24" ry="18" transform="rotate(-20 120 182)" fill="#5CC8FF"/><circle cx="114" cy="180" r="3" fill="#15132B"/><circle cx="127" cy="178" r="3" fill="#15132B"/><path d="M113 186 Q121 193 128 184" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/><line x1="193" y1="192.0" x2="193" y2="98.0" stroke="#C6F432" stroke-width="8" stroke-linecap="round"/><ellipse cx="174" cy="196.0" rx="24" ry="18" transform="rotate(-20 174 196.0)" fill="#FF7EB6"/><circle cx="168" cy="194.0" r="3" fill="#15132B"/><circle cx="181" cy="192.0" r="3" fill="#15132B"/><path d="M167 200.0 Q175 207.0 182 198.0" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round"/><path d="M81.5 64 L196.5 92.9 L196.5 110.9 L81.5 82 Z" fill="#C6F432" stroke="#C6F432" stroke-width="2" stroke-linejoin="round"/></g></svg><h1><span style="color:#FF9F5A">ファ</span><span style="color:#5CC8FF">ミ</span><span style="color:#FF7EB6">レ</span><span style="color:#C6F432">コ</span></h1>' : '<h1>' + TITLES[scr] + '</h1>') + '</header><main id="main">' + V[scr]() + '</main>';
   if (showNav) {
     h += '<nav aria-label="メインメニュー">';
     [['ホーム', 'home', 'home'], ['アルバム', 'album', 'album'], ['保護者', 'pin', 'lock']].forEach(function (n) {
