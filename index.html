@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>かぞくトーク プロトタイプ</title>
+<meta name="description" content="親子の会話を習慣にする「かぞくトーク」のプロトタイプ。お題ルーレット、盛り上がりスコア、グラレコ、月次ショートアニメ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Yomogi&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#15132B; --surface:#221F45; --surface2:#2A2752; --line:#3A3670; --line2:#4A4680; --track:#2E2A5C;
+  --text:#F4F2FF; --muted:#B9B5DA; --lime:#C6F432; --pink:#FF5FA2; --paper:#FFFDF6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#0B0A18;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px 16px}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.phone{width:390px;height:844px;background:var(--ink);border-radius:44px;border:1px solid #2E2A5C;box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.bar{display:flex;align-items:center;gap:10px;padding:18px 20px 10px;min-height:64px}
+.bar h1{margin:0;font-family:'Dela Gothic One',sans-serif;font-weight:400;font-size:21px;letter-spacing:.5px}
+.iconbtn{width:44px;height:44px;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo{width:32px;height:32px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+main{flex:1;overflow-y:auto;padding:8px 20px 28px}
+.col{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}
+.muted{color:var(--muted)}
+.disp{font-family:'Dela Gothic One',sans-serif;font-weight:400}
+.label{margin:0;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime)}
+h2{margin:0;font-size:16px;font-weight:900}
+p{margin:0}
+.btn{height:60px;border:none;border-radius:30px;background:var(--lime);color:var(--ink);font-size:18px;font-weight:900;width:100%}
+.btn.big{height:68px;border-radius:34px;font-size:20px}
+.btn.pink{background:var(--pink)}
+.btn.ghost{height:50px;border:2px solid var(--line2);background:transparent;color:var(--text);font-size:15px;font-weight:700}
+.chip{align-self:flex-start;padding:4px 12px;border-radius:12px;color:var(--ink);font-size:13px;font-weight:900}
+.notice{padding:12px 16px;border-radius:16px;font-size:14px;font-weight:700}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:14px;text-align:left;color:var(--text);width:100%}
+.row img{width:56px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;display:block}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:8px;display:flex;flex-direction:column;gap:6px;text-align:left;color:var(--text)}
+.tile img{width:100%;height:180px;border-radius:12px;object-fit:cover;object-position:top;display:block}
+.tile .d{padding:0 4px;font-size:11px;color:var(--muted)}
+.tile .t{padding:0 4px 4px;font-size:13px;font-weight:700;line-height:1.4}
+nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#1C1A3A;border-top:1px solid var(--track);padding:6px 12px 16px}
+nav button{height:58px;border:none;background:transparent;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.tweak{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:3px}
+.seg button{height:34px;padding:0 14px;border:none;border-radius:17px;background:transparent;color:var(--muted);font-size:13px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--lime);color:var(--ink);font-weight:900}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pan{from{transform:scale(1.2) translateY(12px)}to{transform:scale(1.4) translateY(-26px)}}
+@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.07)}}
+@media (max-width:440px){
+  body{padding:0;justify-content:flex-start;gap:0}
+  .phone{width:100vw;height:100dvh;border-radius:0;border:none;box-shadow:none}
+  .tweak{padding:10px 16px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="phone" id="app" aria-live="polite"></div>
+<div class="tweak">
+  <span>プラン切り替え（説明用）</span>
+  <div class="seg" role="group" aria-label="プラン">
+    <button data-a="plan" data-k="sub" aria-pressed="true">サブスク会員</button>
+    <button data-a="plan" data-k="free" aria-pressed="false">無料</button>
+  </div>
+</div>
+<script>
+'use strict';
+var IMG = {
+  vr: 'assets/gr-vr.jpg', suki: 'assets/gr-sukinamono.jpg', shoot: 'assets/gr-shoot.jpg', tama: 'assets/gr-tamagoyaki.jpg',
+  song: 'assets/gr-song.jpg', man: 'assets/gr-100man.jpg', oki: 'assets/gr-okinawa.jpg', camp: 'assets/gr-camp.jpg'
+};
+var REC = {
+  vr: ['10/29（木）', '将来と夢', 'VRで叶える 魔法少女計画'],
+  suki: ['10/23（金）', '好きなもの', '好きなもの対決！'],
+  shoot: ['10/16（金）', '学校と友達', '初めてのシュートが 決まった日'],
+  tama: ['10/9（金）', '思い出', 'お母さんの 特製玉子焼き'],
+  song: ['9/25（金）', '好きなもの', 'お母さん 青春ソング祭り'],
+  man: ['9/18（金）', 'もしも話', 'もしも100万円 当たったら？'],
+  oki: ['9/11（金）', '思い出', '沖縄の海の 浮き輪事件'],
+  camp: ['9/4（金）', 'たのしい話', 'キャンプ大事件！']
+};
+var CATS = [
+  { name: 'たのしい話', color: '#FF9F5A', topic: '最近いちばん笑ったことは？' },
+  { name: 'もしも話', color: '#9C8CFF', topic: 'もし1日だけ 動物になれるなら？' },
+  { name: '思い出', color: '#FFD34D', topic: '家族旅行で 覚えていることは？' },
+  { name: '好きなもの', color: '#5EE6B0', topic: '今ハマっているものを 教えて' },
+  { name: '学校と友達', color: '#FF7EB6', topic: '学校で 楽しみな時間は いつ？' },
+  { name: '将来と夢', color: '#5CC8FF', topic: '10年後、何をしていたい？' }
+];
+var FIXED_CAT = 5;
+var PEOPLE = [
+  { id: 'mom', name: 'お母さん', sub: '保護者', short: '母', bg: '#FF9F5A' },
+  { id: 'dad', name: 'お父さん', sub: '保護者', short: '父', bg: '#5EE6B0' },
+  { id: 'haru', name: 'はると', sub: '中1', short: 'は', bg: '#5CC8FF' },
+  { id: 'yui', name: 'ゆい', sub: '小5', short: 'ゆ', bg: '#FF7EB6' }
+];
+var TITLES = { home: 'かぞくトーク', members: 'メンバー', roulette: 'お題ルーレット', talk: 'トーク中', analyzing: 'ふりかえり中', result: '今日のスコア', grareco: 'グラレコ', album: 'アルバム', anime: 'ショートアニメ', photo: 'グラレコ', pin: '保護者ページ', parent: '保護者ページ' };
+var SCENE_BG = ['#FFE3CC', '#E4DEFF', '#FFF1BF', '#FFE0EC', '#D9F0FF', '#D6F7E8', '#F0FFC9'];
+var ICON = {
+  back: '<path d="M15 6l-6 6 6 6"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+  lock: '<path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  home: '<path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/>',
+  album: '<path d="M4 5h16v14H4zM4 15l5-4 4 3 3-2 4 3M15.5 9h.01"/>',
+  flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>'
+};
+
+var S = {
+  screen: 'home', sel: { mom: true, dad: false, haru: true, yui: true },
+  rot: 0, spinning: false, cat: -1, passUsed: false, ms: 0, meter: 30, eqSeed: 0,
+  freeLeft: 3, counted: false, notice: '', saved: false, justSaved: false, pin: '',
+  scene: 0, animeTick: 0, playing: false, bought: { '9': true, '10': false, '8': false }, animeMonth: '9',
+  photo: '', photoFrom: 'album', plan: 'sub'
+};
+var spinTimer = null, finishTimer = null;
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function svg(name, size, color, sw, extra) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="' + (sw || 2.4) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + ICON[name] + '</svg>';
+}
+function isSub() { return S.plan === 'sub'; }
+function cur() { return CATS[S.cat >= 0 ? S.cat : FIXED_CAT]; }
+function chosen() { return PEOPLE.filter(function (p) { return S.sel[p.id]; }); }
+function scenes(k) {
+  return [k + '月は 4回 話したよ', 'キャンプで テントが 飛ばされそうに！', '沖縄の海で 浮き輪が 流された…', 'もしも100万円 当たったら？', 'お母さんの 青春ソングで 大合唱', '家族スコアは 72 → 81 に アップ', 'また来月も 話そうね'];
+}
+function set(p) { Object.assign(S, p); render(); }
+function go(screen, extra) { set(Object.assign({ screen: screen, notice: '', justSaved: false }, extra || {})); }
+
+/* ---------- 部品 ---------- */
+function rowRec(k) {
+  var r = REC[k];
+  return '<button class="row" data-a="open" data-k="' + k + '"><img src="' + IMG[k] + '" alt=""><span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="muted" style="font-size:12px">' + r[0] + '・' + r[1] + '</span><span style="font-size:15px;font-weight:700">' + r[2] + '</span></span></button>';
+}
+function tileRec(k) {
+  var r = REC[k];
+  return '<button class="tile" data-a="open" data-k="' + k + '"><img src="' + IMG[k] + '" alt="" loading="lazy"><span class="d">' + r[0] + '・' + r[1] + '</span><span class="t">' + r[2] + '</span></button>';
+}
+function locked(title, body, cta) {
+  return '<section class="card" style="padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">' +
+    '<span style="width:56px;height:56px;border-radius:28px;background:var(--track);display:flex;align-items:center;justify-content:center">' + svg('lock', 26, '#C6F432', 2.2) + '</span>' +
+    '<p style="font-size:18px;font-weight:900">' + title + '</p><p class="muted" style="font-size:14px;line-height:1.6">' + body + '</p>' +
+    '<button class="btn" style="height:54px;font-size:16px" data-a="toPin">' + cta + '</button></section>';
+}
+function animeRows() {
+  return [{ k: '10', label: '10月', thumb: '#FF9F5A' }, { k: '9', label: '9月', thumb: '#9C8CFF' }, { k: '8', label: '8月', thumb: '#5CC8FF' }].map(function (m) {
+    var bought = !!S.bought[m.k], current = m.k === '10';
+    return {
+      k: m.k, label: m.label, bought: bought, thumb: bought ? m.thumb : '#4A4680', canWatch: bought && !current,
+      albumNote: bought ? (current ? '購入済み・10/31に作成されます' : '購入済み・60秒') : '保護者ページで 購入できます',
+      parentNote: current ? '月末（10/31）に作成' : '購入すると すぐ作成'
+    };
+  });
+}
+
+/* ---------- 画面 ---------- */
+var V = {};
+V.home = function () {
+  var h = '<div class="col">';
+  if (S.notice) h += '<p class="notice" style="background:#3A1D3A;border:1px solid var(--pink);color:#FFC2DC">' + esc(S.notice) + '</p>';
+  h += '<section class="card" style="position:relative;overflow:hidden;padding:22px;display:flex;flex-direction:column;gap:6px">' +
+    '<svg aria-hidden="true" style="position:absolute;right:-28px;top:-28px" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="#8B7BFF" stroke-width="14" opacity=".55"/><circle cx="75" cy="75" r="28" fill="#FF5FA2" opacity=".85"/></svg>' +
+    '<p class="label">NEXT TALK</p><p class="disp" style="font-size:30px;line-height:1.25;position:relative">金曜日<br>20:00</p><p class="muted" style="margin-top:4px;font-size:14px">夕ごはんのあと、15分だけ話そう</p></section>';
+  if (!isSub()) h += '<p class="muted" style="font-size:14px;text-align:center">無料プラン：今月のこり <strong style="color:var(--lime);font-weight:900">' + S.freeLeft + ' / 4 回</strong></p>';
+  h += '<button class="btn big" data-a="start" style="display:flex;align-items:center;justify-content:center;gap:10px">かぞくトークを はじめる ' + svg('arrow', 22, null, 2.8) + '</button>';
+  h += '<section class="grid2">' +
+    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">' + svg('flame', 16, '#FF9F5A') + '今月 話した回数</p><p class="disp" style="font-size:30px">' + (S.saved ? 4 : 3) + '<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 回</span></p></div>' +
+    '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C6F432" aria-hidden="true">' + ICON.star + '</svg>家族スコア 平均</p><p class="disp" style="font-size:30px">78<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 点</span></p></div></section>';
+  h += '<section class="col" style="gap:10px"><h2>さいきんの グラレコ</h2>' + (S.saved ? rowRec('vr') : '') + rowRec('suki') + (S.saved ? '' : rowRec('shoot')) + '</section></div>';
+  return h;
+};
+V.members = function () {
+  var ch = chosen();
+  var h = '<div class="col" style="gap:18px"><p style="font-size:17px;font-weight:900">今日 話す人を えらんでね</p><div class="grid2">';
+  PEOPLE.forEach(function (p) {
+    var on = !!S.sel[p.id];
+    h += '<button data-a="pick" data-k="' + p.id + '" aria-pressed="' + on + '" style="position:relative;min-height:150px;border-radius:24px;border:3px solid ' + (on ? '#C6F432' : '#3A3670') + ';background:' + (on ? '#2A2752' : '#1C1A3A') + ';opacity:' + (on ? 1 : .7) + ';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text)">' +
+      (on ? '<span aria-hidden="true" style="position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:13px;background:var(--lime);display:flex;align-items:center;justify-content:center">' + svg('check', 16, '#15132B', 3.2) + '</span>' : '') +
+      '<span class="disp" style="width:64px;height:64px;border-radius:32px;background:' + p.bg + ';color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:26px">' + p.short + '</span>' +
+      '<span style="font-size:17px;font-weight:900">' + p.name + '</span><span class="muted" style="font-size:12px;font-weight:700">' + p.sub + '・' + (on ? '参加' : 'お休み') + '</span></button>';
+  });
+  h += '</div><p class="muted" style="font-size:13px;text-align:center">' + (ch.length >= 2 ? ch.map(function (p) { return p.name; }).join('・') + ' で話します' : '2人以上 えらんでね') + '</p>';
+  h += '<button class="btn" data-a="toRoulette">このメンバーで 決定</button></div>';
+  return h;
+};
+V.roulette = function () {
+  var c = cur(), showTopic = S.cat >= 0 && !S.spinning;
+  var h = '<div class="col" style="align-items:center;gap:20px"><p style="font-size:17px;font-weight:900">ルーレットで お題を決めよう</p>' +
+    '<div style="position:relative;width:300px;height:312px">' +
+    '<div aria-hidden="true" style="position:absolute;left:0;top:12px;width:300px;height:300px;border-radius:50%;background:var(--surface);border:1px solid var(--line)"></div>' +
+    '<div id="wheel" style="position:absolute;left:18px;top:30px;width:264px;height:264px;border-radius:50%;border:5px solid var(--ink);background:conic-gradient(#FF9F5A 0deg 60deg,#9C8CFF 60deg 120deg,#FFD34D 120deg 180deg,#5EE6B0 180deg 240deg,#FF7EB6 240deg 300deg,#5CC8FF 300deg 360deg);transform:rotate(' + S.rot + 'deg)">';
+  CATS.forEach(function (cc, i) {
+    h += '<span style="position:absolute;left:50%;top:50%;width:96px;height:20px;margin-left:-48px;margin-top:-10px;text-align:center;font-size:13px;font-weight:900;color:var(--ink);transform:rotate(' + (60 * i + 30) + 'deg) translateY(-84px)">' + cc.name + '</span>';
+  });
+  h += '</div><div aria-hidden="true" style="position:absolute;left:118px;top:130px;width:64px;height:64px;border-radius:32px;background:var(--ink);border:4px solid var(--lime);display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="#C6F432">' + ICON.star + '</svg></div>' +
+    '<svg aria-hidden="true" style="position:absolute;left:132px;top:0" width="36" height="40" viewBox="0 0 36 40"><path d="M4 4h28L18 36z" fill="#C6F432" stroke="#15132B" stroke-width="4" stroke-linejoin="round"/></svg></div>';
+  if (showTopic) {
+    h += '<div class="col" style="width:100%;gap:12px"><div class="card" style="border:2px solid ' + c.color + ';display:flex;flex-direction:column;gap:10px"><span class="chip" style="background:' + c.color + '">' + c.name + '</span><p style="font-size:22px;font-weight:900;line-height:1.45">' + c.topic + '</p></div>' +
+      '<button class="btn" data-a="toTalk">このお題で 話す</button>' + (S.passUsed ? '' : '<button class="btn ghost" data-a="pass">パスする（1回だけ）</button>') + '</div>';
+  } else {
+    h += '<button class="btn big pink" data-a="spin" style="letter-spacing:2px;font-size:22px"' + (S.spinning ? ' disabled' : '') + '>' + (S.spinning ? 'まわっています…' : 'まわす！') + '</button>';
+  }
+  return h + '</div>';
+};
+function eqBars() {
+  var lit = Math.round(S.meter / 100 * 16), out = [];
+  for (var i = 0; i < 16; i++) {
+    var wave = Math.abs(Math.sin((i + 1) * 1.7 + S.eqSeed * 0.9)), on = i < lit;
+    out.push({ h: Math.round(on ? 14 + wave * 42 : 8 + wave * 8), c: on ? (i > 11 ? '#FF5FA2' : (i > 7 ? '#FFD34D' : '#C6F432')) : '#2E2A5C' });
+  }
+  return out;
+}
+function meterInfo() {
+  return S.meter > 70 ? ['大もりあがり！', '#FF5FA2'] : (S.meter > 45 ? ['いい感じ', '#FFD34D'] : ['ゆっくり', '#C6F432']);
+}
+function timerText() {
+  var secs = Math.floor(S.ms / 1000);
+  return String(Math.floor(secs / 60)).padStart(2, '0') + ':' + String(secs % 60).padStart(2, '0');
+}
+V.talk = function () {
+  var c = cur(), mi = meterInfo();
+  var h = '<div class="col"><div class="card" style="border:2px solid ' + c.color + ';display:flex;flex-direction:column;gap:10px"><span class="chip" style="background:' + c.color + '">' + c.name + '</span><p style="font-size:22px;font-weight:900;line-height:1.45">' + c.topic + '</p></div>' +
+    '<p id="timer" class="disp" style="margin-top:6px;text-align:center;font-size:64px;letter-spacing:3px;line-height:1">' + timerText() + '</p>' +
+    '<p class="muted" style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px"><span style="width:10px;height:10px;border-radius:5px;background:#FF4D5E;display:inline-block;animation:pulse 1.2s ease-in-out infinite"></span>録音中・音声は文字起こしのあと すぐ削除</p>' +
+    '<div class="card" style="display:flex;flex-direction:column;gap:14px"><div style="display:flex;justify-content:space-between;align-items:baseline"><p class="muted" style="font-size:14px;font-weight:700">もりあがりメーター</p><p id="meterLabel" style="font-size:17px;font-weight:900;color:' + mi[1] + '">' + mi[0] + '</p></div>' +
+    '<div aria-hidden="true" style="display:flex;align-items:flex-end;gap:5px;height:56px">';
+  eqBars().forEach(function (e) { h += '<span class="eq" style="flex:1;height:' + e.h + 'px;border-radius:4px;background:' + e.c + ';transition:height .6s ease,background .6s ease"></span>'; });
+  h += '</div></div><p class="muted" style="text-align:center;font-size:14px">スマホは置いて、顔を見て話そう</p>' +
+    '<div class="grid2"><button class="btn ghost" style="height:58px;font-size:16px;font-weight:900" data-a="nextTopic">次のお題へ</button><button class="btn" style="height:58px;font-size:16px" data-a="finish">おわる</button></div></div>';
+  return h;
+};
+V.analyzing = function () {
+  return '<div style="height:620px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center">' +
+    '<div aria-hidden="true" style="width:88px;height:88px;border-radius:44px;border:8px solid var(--track);border-top-color:var(--lime);border-right-color:var(--pink);animation:spin 1s linear infinite"></div>' +
+    '<p style="font-size:20px;font-weight:900">AIが 会話を ふりかえり中…</p><p class="muted" style="font-size:14px">スコアは1分以内、グラレコは数分でとどくよ</p></div>';
+};
+V.result = function () {
+  var ind = [['発話バランス', 21, 25, '#C6F432'], ['会話の往復', 16, 20, '#5CC8FF'], ['笑い', 12, 15, '#FFD34D'], ['ポジティブな気持ち', 17, 20, '#FF7EB6'], ['話題の深まり', 14, 20, '#9C8CFF']];
+  var goods = ['はるとが たくさん 話してくれたね', 'みんなで 5回 大笑いしたよ', '「それで どうなったの？」と 話が どんどん広がったね'];
+  var h = '<div class="col"><section class="card" style="position:relative;overflow:hidden;border-radius:28px;padding:26px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:6px">' +
+    '<svg aria-hidden="true" style="position:absolute;left:22px;top:22px;animation:bob 2.4s ease-in-out infinite" width="22" height="22" viewBox="0 0 24 24" fill="#FFD34D">' + ICON.star + '</svg>' +
+    '<svg aria-hidden="true" style="position:absolute;right:28px;top:44px" width="14" height="14" viewBox="0 0 24 24" fill="#FF5FA2"><circle cx="12" cy="12" r="10"/></svg>' +
+    '<p class="label">TODAY\'S FAMILY SCORE</p><p class="disp" style="font-size:92px;line-height:1.05;color:var(--lime)">80<span class="muted" style="font-size:22px"> / 100</span></p>' +
+    '<p style="margin-top:2px;padding:6px 16px;border-radius:16px;background:var(--pink);color:var(--ink);font-size:15px;font-weight:900">ナイス トーク！</p>' +
+    '<p class="muted" style="margin-top:10px;font-size:12px;text-align:center">家族みんなで つくった点数。ほかの家族とは くらべません。</p></section><section class="card" style="display:flex;flex-direction:column;gap:14px">';
+  ind.forEach(function (x) {
+    h += '<div style="display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:700">' + x[0] + '</span><span class="muted" style="font-weight:700">' + x[1] + ' / ' + x[2] + '</span></div>' +
+      '<div style="height:10px;border-radius:5px;background:var(--track);overflow:hidden"><div style="height:10px;border-radius:5px;background:' + x[3] + ';width:' + Math.round(x[1] / x[2] * 100) + '%"></div></div></div>';
+  });
+  h += '</section><section class="card" style="display:flex;flex-direction:column;gap:12px"><h2>よかったところ</h2>';
+  goods.forEach(function (g) {
+    h += '<div style="display:flex;align-items:flex-start;gap:10px"><span aria-hidden="true" style="width:24px;height:24px;border-radius:12px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0">' + svg('check', 14, '#15132B', 3.4) + '</span><p style="font-size:14px;line-height:1.6">' + g + '</p></div>';
+  });
+  return h + '</section><button class="btn" data-a="toGrareco">グラレコを 見る</button></div>';
+};
+V.grareco = function () {
+  if (!isSub()) return '<div class="col">' + locked('グラレコは サブスク会員の機能です', '会話を 1枚の絵にして アルバムに残せます。プランは 保護者ページで 変更できます。', '保護者ページへ') + '<button class="btn ghost" data-a="goHome">ホームへ もどる</button></div>';
+  return '<div class="col"><section aria-label="グラフィックレコーディング" style="border-radius:20px;overflow:hidden;border:4px solid var(--paper);transform:rotate(-1deg);line-height:0">' +
+    '<img src="' + IMG.vr + '" alt="グラレコ：将来と夢 VRで叶える魔法少女計画。ゆいは魔法少女になりたい、はるとはVRゲームをつくりたい。ふたりの夢がつながって、家族でハイタッチ" style="width:100%;display:block"></section>' +
+    '<p class="muted" style="margin-top:4px;font-size:12px;line-height:1.6">※生成イメージの例です。家族のアバターで、会話の場面を 1枚の絵にします。</p>' +
+    '<p class="muted" style="font-size:13px">保存する前に、家族で 絵を確認してね。残したくない回は 残さなくて大丈夫。</p>' +
+    '<button class="btn" data-a="saveRec">アルバムに 保存</button><button class="btn ghost" data-a="discard">この回は 残さない</button></div>';
+};
+V.album = function () {
+  if (!isSub()) return '<div class="col">' + locked('アルバムは サブスク会員の機能です', 'グラレコを ためて、毎月の ショートアニメ（買い切り）も 作れます。', '保護者ページで プランを見る') + '</div>';
+  var h = '<div class="col" style="gap:18px">';
+  if (S.justSaved) h += '<p class="notice" style="background:#1F3A2A;border:1px solid #5EE6B0;color:#BFF5DD">グラレコを アルバムに 保存しました</p>';
+  h += '<section class="col" style="gap:10px"><h2>月ごとの ショートアニメ</h2>';
+  animeRows().forEach(function (a) {
+    h += '<div class="card" style="border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:14px"><div aria-hidden="true" style="width:44px;height:60px;border-radius:10px;background:' + a.thumb + ';display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="#15132B"><path d="M8 5v14l11-7z"/></svg></div>' +
+      '<div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><p style="font-size:16px;font-weight:900">' + a.label + 'の アニメ</p><p class="muted" style="font-size:12px">' + a.albumNote + '</p></div>' +
+      (a.canWatch ? '<button class="btn" style="width:auto;height:44px;padding:0 18px;font-size:14px;flex-shrink:0" data-a="watch" data-k="' + a.k + '">見る</button>' : '') + '</div>';
+  });
+  h += '</section><section class="col" style="gap:10px"><h2>10月の グラレコ</h2><div class="grid2">' + (S.saved ? tileRec('vr') : '') + tileRec('suki') + tileRec('shoot') + tileRec('tama') + '</div></section>';
+  h += '<section class="col" style="gap:10px"><h2>9月の グラレコ</h2><div class="grid2">' + tileRec('song') + tileRec('man') + tileRec('oki') + tileRec('camp') + '</div></section></div>';
+  return h;
+};
+V.photo = function () {
+  var r = REC[S.photo] || REC.vr;
+  return '<div class="col" style="gap:12px"><p class="muted" style="font-size:12px">' + r[0] + '・' + r[1] + '</p><p style="font-size:18px;font-weight:900">' + r[2] + '</p>' +
+    '<img src="' + (IMG[S.photo] || IMG.vr) + '" alt="グラレコ：' + r[2] + '" style="width:100%;border-radius:16px;border:3px solid var(--paper);display:block"></div>';
+};
+var CHAR = {
+  haru: '<path d="M6 110Q6 68 40 66Q74 68 74 110Z" fill="#5CC8FF"/><circle cx="40" cy="36" r="24" fill="#FFE8D2"/><path d="M16 32Q17 6 40 8Q64 6 65 32Q53 20 40 22Q27 18 16 32Z" fill="#3B2F4A"/><circle cx="32" cy="37" r="2.4" fill="#15132B" stroke="none"/><circle cx="48" cy="37" r="2.4" fill="#15132B" stroke="none"/><path d="M32 45h16a8 8 0 0 1-16 0z" fill="#FF6B6B" stroke-width="2"/>',
+  yui: '<path d="M6 110Q6 68 40 66Q74 68 74 110Z" fill="#FF7EB6"/><circle cx="13" cy="26" r="9" fill="#3B2F4A"/><circle cx="67" cy="26" r="9" fill="#3B2F4A"/><circle cx="40" cy="36" r="24" fill="#FFE8D2"/><path d="M16 32Q17 6 40 8Q64 6 65 32Q52 18 40 24Q28 18 16 32Z" fill="#3B2F4A"/><path d="M30 38q3-3 6 0M44 38q3-3 6 0" fill="none" stroke-width="2.2"/><path d="M33 46q7 6 14 0" fill="none" stroke-width="2.2"/>',
+  mom: '<path d="M6 110Q6 68 40 66Q74 68 74 110Z" fill="#FF9F5A"/><circle cx="40" cy="9" r="11" fill="#3B2F4A"/><circle cx="40" cy="36" r="24" fill="#FFE8D2"/><path d="M16 34Q15 10 40 12Q65 10 64 34Q53 22 40 26Q27 22 16 34Z" fill="#3B2F4A"/><circle cx="32" cy="38" r="2.4" fill="#15132B" stroke="none"/><circle cx="48" cy="38" r="2.4" fill="#15132B" stroke="none"/><path d="M33 45q7 6 14 0" fill="none" stroke-width="2.2"/>'
+};
+function sceneHTML(i) {
+  var G = '<g filter="url(#rough)" stroke="#15132B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:126px 200px;animation:zoom 3s ease-out both">';
+  var defs = '<defs><filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>' +
+    '<marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1l8 4-8 4" fill="none" stroke="#15132B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+  var open = '<svg viewBox="0 0 252 448" width="252" height="448" aria-hidden="true" style="position:absolute;left:0;top:0">' + defs;
+  if (i === 0) {
+    var pos = [['camp', 14, 58, -7], ['oki', 128, 48, 6], ['man', 20, 200, 5], ['song', 124, 190, -5]], h = '<div style="position:absolute;inset:0;animation:zoom 3s ease-out both">';
+    pos.forEach(function (p) { h += '<img src="' + IMG[p[0]] + '" alt="" style="position:absolute;left:' + p[1] + 'px;top:' + p[2] + 'px;width:110px;height:150px;object-fit:cover;object-position:top;border:4px solid #fff;border-radius:6px;box-shadow:0 6px 14px rgba(21,19,43,.25);transform:rotate(' + p[3] + 'deg)">'; });
+    return h + '<p class="disp" style="position:absolute;left:82px;top:136px;width:88px;height:88px;border-radius:44px;background:#FFD34D;border:3px solid #15132B;display:flex;align-items:center;justify-content:center;font-size:30px;color:#15132B;transform:rotate(-8deg)">' + S.animeMonth + '月</p></div>';
+  }
+  if (i >= 1 && i <= 4) {
+    var k = ['camp', 'oki', 'man', 'song'][i - 1];
+    return '<img src="' + IMG[k] + '" alt="" style="position:absolute;left:0;top:0;width:252px;height:378px;transform-origin:50% 30%;animation:pan 3s ease-in-out both">';
+  }
+  if (i === 5) {
+    return open + G + '<path d="M34 60V320H226" fill="none" stroke-width="3"/><rect x="62" y="166" width="54" height="154" rx="6" fill="#9C8CFF"/><rect x="144" y="126" width="54" height="194" rx="6" fill="#C6F432"/>' +
+      '<path d="M78 136Q120 60 170 84" fill="none" stroke-width="3.4" marker-end="url(#ah)"/><path d="M206 52l4 9 9 4-9 4-4 9-4-9-9-4 9-4z" fill="#FFD34D" stroke-width="1.8"/><path d="M44 92l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#FF5FA2" stroke-width="1.8"/></g>' +
+      '<g font-family="\'Dela Gothic One\',sans-serif" fill="#15132B" text-anchor="middle"><text x="89" y="156" font-size="24">72</text><text x="171" y="116" font-size="28">81</text></g></svg>';
+  }
+  return open + G + '<path d="M126 210c-14-40-80-36-80 8 0 40 80 84 80 84s80-44 80-84c0-44-66-48-80-8z" fill="#FF7EB6" opacity=".5"/><path d="M200 60a26 26 0 1 0 14 46a20 20 0 1 1-14-46z" fill="#FFD34D"/>' +
+    '<path d="M40 70l3 6 6 3-6 3-3 6-3-6-6-3 6-3zM120 40l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#fff" stroke-width="1.8"/><path d="M20 340H232" stroke-width="3"/>' +
+    '<path d="M24 268l-10-34" stroke-width="5"/><circle cx="13" cy="228" r="7" fill="#FFE8D2"/><path d="M228 268l10-34" stroke-width="5"/><circle cx="239" cy="228" r="7" fill="#FFE8D2"/>' +
+    '<svg x="8" y="230" width="80" height="110" viewBox="0 0 80 110">' + CHAR.haru + '</svg><svg x="86" y="220" width="80" height="110" viewBox="0 0 80 110">' + CHAR.mom + '</svg><svg x="164" y="230" width="80" height="110" viewBox="0 0 80 110">' + CHAR.yui + '</svg></g></svg>';
+}
+V.anime = function () {
+  var sc = scenes(S.animeMonth), last = S.scene >= sc.length - 1;
+  var h = '<div class="col" style="align-items:center"><div role="img" aria-label="' + S.animeMonth + '月の ショートアニメ：' + esc(sc[S.scene]) + '" style="position:relative;overflow:hidden;width:260px;height:456px;border-radius:28px;border:4px solid var(--text);background:' + SCENE_BG[S.scene % SCENE_BG.length] + ';transition:background .5s ease">' +
+    '<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(21,19,43,.12) 0.9px,transparent 1px);background-size:14px 14px"></div>' + sceneHTML(S.scene) +
+    '<p style="position:absolute;left:14px;top:14px;padding:4px 10px;border-radius:12px;background:var(--ink);color:var(--text);font-size:11px;font-weight:900;letter-spacing:1px">' + S.animeMonth + '月の ショートアニメ</p>' +
+    '<p style="position:absolute;left:14px;right:14px;bottom:18px;padding:10px 12px;border-radius:14px;border:2.5px solid var(--ink);background:var(--paper);color:var(--ink);font-size:17px;font-weight:900;line-height:1.45;text-align:center">' + sc[S.scene] + '</p></div>' +
+    '<div style="display:flex;gap:6px" aria-hidden="true">';
+  sc.forEach(function (x, i) { h += '<span style="width:' + (i === S.scene ? 22 : 8) + 'px;height:8px;border-radius:4px;background:' + (i === S.scene ? '#C6F432' : '#3A3670') + '"></span>'; });
+  return h + '</div><button class="btn" style="height:56px;font-size:16px" data-a="togglePlay">' + (S.playing ? '一時停止' : (last ? 'もう一度 見る' : '再生')) + '</button></div>';
+};
+V.pin = function () {
+  var h = '<div class="col" style="align-items:center;gap:20px;padding-top:12px"><span aria-hidden="true" style="width:64px;height:64px;border-radius:32px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center">' + svg('lock', 28, '#C6F432', 2.2) + '</span>' +
+    '<p style="font-size:18px;font-weight:900">保護者の PIN を入力</p><p class="muted" style="font-size:12px">プロトタイプでは どの4桁でも開きます</p><div style="display:flex;gap:18px" aria-label="入力した桁数 ' + S.pin.length + ' / 4">';
+  for (var i = 0; i < 4; i++) h += '<span style="width:16px;height:16px;border-radius:8px;border:2px solid var(--lime);background:' + (i < S.pin.length ? '#C6F432' : 'transparent') + '"></span>';
+  h += '</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:288px">';
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'もどる', '0', '消す'].forEach(function (k) {
+    h += '<button data-a="key" data-k="' + k + '" style="height:66px;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text);font-size:' + (k.length > 1 ? '15px' : '26px') + ';font-weight:900">' + k + '</button>';
+  });
+  return h + '</div></div>';
+};
+V.parent = function () {
+  var sec = function (title, body) { return '<section class="card" style="border-radius:22px;display:flex;flex-direction:column;gap:8px"><h2>' + title + '</h2>' + body + '</section>'; };
+  var h = '<div class="col" style="gap:14px">' +
+    sec('聞き役の コツ', '<p style="font-size:14px;line-height:1.7">前回は 保護者の話す割合が <strong style="color:#FF9F5A;font-weight:900">58%</strong> でした。次は「それで どうなったの？」と 聞いて、お子さんの話を 待ってみましょう。</p>') +
+    sec('<span style="display:inline-flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:10px;height:10px;border-radius:5px;background:#5EE6B0"></span>見守り</span>', '<p style="font-size:14px;line-height:1.7">気になるサインは 見つかっていません。</p><p class="muted" style="font-size:12px;line-height:1.6">見つかったときは ここに 接し方のヒントと 相談窓口を表示します。お子さんの画面には 表示されません。</p>') +
+    sec('プラン', '<p style="font-size:14px;line-height:1.7">' + (isSub() ? 'サブスク会員（グラレコ・アルバムが使えます）' : '無料プラン（ルーレットとスコア・今月のこり ' + S.freeLeft + ' / 4 回）') + '</p>');
+  var buy = '';
+  if (isSub()) {
+    buy += '<div class="col" style="gap:14px">';
+    animeRows().forEach(function (a) {
+      buy += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div style="display:flex;flex-direction:column;gap:2px"><p style="font-size:15px;font-weight:900">' + a.label + '</p><p class="muted" style="font-size:12px">' + a.parentNote + '</p></div>' +
+        (a.bought ? '<span style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:900;color:#5EE6B0;flex-shrink:0">' + svg('check', 16, null, 3) + '購入済み</span>' : '<button class="btn pink" style="width:auto;height:44px;padding:0 16px;font-size:13px;flex-shrink:0" data-a="buy" data-k="' + a.k + '">購入 [価格]円</button>') + '</div>';
+    });
+    buy += '<p class="muted" style="font-size:12px;line-height:1.6">サブスク会員の間だけ、加入していた月の アニメを 買えます。</p></div>';
+  } else buy = '<p style="font-size:14px;line-height:1.7">アニメは サブスク会員だけが 購入できます。</p>';
+  h += '<section class="card" style="border-radius:22px;display:flex;flex-direction:column;gap:14px"><h2>ショートアニメを 買う</h2>' + buy + '</section>' +
+    sec('データ', '<p style="font-size:14px;line-height:1.7">音声は 文字起こしのあと すぐ削除されます。文字起こしは 毎月末に削除されます。会話の全文は 保護者にも 表示しません。</p>') +
+    '<button class="btn ghost" style="height:54px;font-size:16px" data-a="goHome">保護者ページを とじる</button></div>';
+  return h;
+};
+
+function render() {
+  var scr = S.screen;
+  var backTo = { members: 'home', roulette: 'members', grareco: 'result', anime: 'album', photo: S.photoFrom, pin: 'home' }[scr];
+  var showNav = scr === 'home' || scr === 'album' || scr === 'pin' || scr === 'parent';
+  var h = '<header class="bar">' + (backTo ? '<button class="iconbtn" data-a="back" aria-label="もどる">' + svg('back', 20, null, 2.5) + '</button>' : '') +
+    (scr === 'home' ? '<span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15132B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 4v-4H6a2 2 0 0 1-2-2z"/><path d="M9 10h.01M12 10h.01M15 10h.01" stroke-width="3"/></svg></span>' : '') +
+    '<h1>' + TITLES[scr] + '</h1></header><main id="main">' + V[scr]() + '</main>';
+  if (showNav) {
+    h += '<nav aria-label="メインメニュー">';
+    [['ホーム', 'home', 'home'], ['アルバム', 'album', 'album'], ['保護者', 'pin', 'lock']].forEach(function (n) {
+      var active = scr === n[1] || (n[1] === 'pin' && scr === 'parent');
+      h += '<button data-a="nav" data-k="' + n[1] + '" style="color:' + (active ? '#C6F432' : '#B9B5DA') + ';font-weight:' + (active ? 900 : 700) + '"' + (active ? ' aria-current="page"' : '') + '>' + svg(n[2], 24, null, 2.2) + n[0] + '</button>';
+    });
+    h += '</nav>';
+  }
+  document.getElementById('app').innerHTML = h;
+  document.querySelectorAll('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.k === S.plan)); });
+}
+
+/* ---------- 操作 ---------- */
+function spin() {
+  if (S.spinning) return;
+  var i = FIXED_CAT, r = S.rot;
+  var target = r - (r % 360) + 360 * 5 + (360 - (60 * i + 30));
+  set({ spinning: true, cat: -1 });
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      var w = document.getElementById('wheel');
+      if (w) { w.style.transition = 'transform 3.1s cubic-bezier(0.17, 0.67, 0.21, 1)'; w.style.transform = 'rotate(' + target + 'deg)'; }
+      S.rot = target;
+    });
+  });
+  clearTimeout(spinTimer);
+  spinTimer = setTimeout(function () { if (S.screen === 'roulette') set({ spinning: false, cat: i }); else S.spinning = false; }, 3200);
+}
+var A = {
+  back: function () { var b = { members: 'home', roulette: 'members', grareco: 'result', anime: 'album', photo: S.photoFrom, pin: 'home' }[S.screen]; go(b, { pin: '', playing: false }); },
+  nav: function (k) { go(k, { pin: '' }); },
+  plan: function (k) { set({ plan: k }); },
+  start: function () {
+    if (!isSub() && S.freeLeft <= 0) { set({ notice: '今月の無料トーク（4回）を使い切りました。来月また話そうね' }); return; }
+    go('members', { passUsed: false, counted: false, ms: 0, meter: 30, cat: -1, saved: false });
+  },
+  pick: function (id) { var s = Object.assign({}, S.sel); s[id] = !s[id]; set({ sel: s }); },
+  toRoulette: function () { if (chosen().length >= 2) go('roulette', { cat: -1 }); },
+  spin: spin,
+  pass: function () { S.passUsed = true; spin(); },
+  toTalk: function () {
+    var extra = { ms: 0, meter: 30 };
+    if (!S.counted && !isSub()) { extra.freeLeft = S.freeLeft - 1; extra.counted = true; }
+    go('talk', extra);
+  },
+  nextTopic: function () { go('roulette', { cat: -1 }); },
+  finish: function () { go('analyzing'); clearTimeout(finishTimer); finishTimer = setTimeout(function () { go('result'); }, 1800); },
+  toGrareco: function () { go('grareco'); },
+  saveRec: function () { go('album', { saved: true, justSaved: true }); },
+  discard: function () { go('home', { saved: false, notice: 'この回の グラレコは 残しませんでした' }); },
+  goHome: function () { go('home'); },
+  toPin: function () { go('pin', { pin: '' }); },
+  open: function (k) { go('photo', { photo: k, photoFrom: S.screen }); },
+  watch: function (m) { go('anime', { animeMonth: m, scene: 0, animeTick: 0, playing: true }); },
+  buy: function (m) { var b = Object.assign({}, S.bought); b[m] = true; set({ bought: b }); },
+  togglePlay: function () {
+    if (S.playing) { set({ playing: false }); return; }
+    if (S.scene >= scenes(S.animeMonth).length - 1) set({ scene: 0, animeTick: 0, playing: true });
+    else set({ playing: true });
+  },
+  key: function (k) {
+    if (k === 'もどる') { go('home', { pin: '' }); return; }
+    if (k === '消す') { set({ pin: S.pin.slice(0, -1) }); return; }
+    var p = S.pin + k;
+    if (p.length >= 4) go('parent', { pin: '' }); else set({ pin: p });
+  }
+};
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-a]');
+  if (!b || b.disabled) return;
+  e.preventDefault();
+  A[b.dataset.a](b.dataset.k);
+});
+
+/* 会話中のメーターとタイマー、アニメの場面送り */
+setInterval(function () {
+  if (S.screen === 'talk') {
+    S.ms += 700; S.eqSeed += 1;
+    S.meter = Math.max(12, Math.min(97, S.meter + Math.round(Math.random() * 30 - 12)));
+    var t = document.getElementById('timer'); if (t) t.textContent = timerText();
+    var mi = meterInfo(), ml = document.getElementById('meterLabel');
+    if (ml) { ml.textContent = mi[0]; ml.style.color = mi[1]; }
+    var bars = eqBars();
+    document.querySelectorAll('.eq').forEach(function (el, i) { el.style.height = bars[i].h + 'px'; el.style.background = bars[i].c; });
+  }
+  if (S.screen === 'anime' && S.playing) {
+    S.animeTick += 1;
+    if (S.animeTick < 4) return;
+    var n = S.scene + 1;
+    if (n >= scenes(S.animeMonth).length) set({ playing: false, animeTick: 0 });
+    else set({ scene: n, animeTick: 0 });
+  }
+}, 700);
+
+render();
+</script>
+</body>
+</html>
