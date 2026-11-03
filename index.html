@@ -116,6 +116,8 @@ var ICON = {
   star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
   home: '<path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/>',
   album: '<path d="M4 5h16v14H4zM4 15l5-4 4 3 3-2 4 3M15.5 9h.01"/>',
+  share: '<path d="M12 15V4M8 8l4-4 4 4M5 12v7h14v-7"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
   flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>'
 };
 
@@ -124,7 +126,8 @@ var S = {
   rot: 0, spinning: false, cat: -1, passUsed: false, ms: 0, meter: 30, eqSeed: 0,
   freeLeft: 3, counted: false, notice: '', saved: false, justSaved: false, pin: '',
   scene: 0, animeTick: 0, playing: false, bought: { '9': true, '10': false, '8': false }, animeMonth: '9',
-  photo: '', photoFrom: 'album', plan: 'sub'
+  photo: '', photoFrom: 'album', plan: 'sub',
+  shareOpen: false, shareOk: false, shareMsg: ''
 };
 var spinTimer = null, finishTimer = null;
 
@@ -139,7 +142,7 @@ function scenes(k) {
   return [k + '月は 4回 話したよ', 'キャンプで テントが 飛ばされそうに！', '沖縄の海で 浮き輪が 流された…', 'もしも100万円 当たったら？', 'お母さんの 青春ソングで 大合唱', '家族スコアは 72 → 81 に アップ', 'また来月も 話そうね'];
 }
 function set(p) { Object.assign(S, p); render(); }
-function go(screen, extra) { set(Object.assign({ screen: screen, notice: '', justSaved: false }, extra || {})); }
+function go(screen, extra) { set(Object.assign({ screen: screen, notice: '', justSaved: false, shareOpen: false }, extra || {})); }
 
 /* ---------- 部品 ---------- */
 function rowRec(k) {
@@ -273,7 +276,8 @@ V.grareco = function () {
     '<img src="' + IMG.vr + '" alt="グラレコ：将来と夢 VRで叶える魔法少女計画。ゆいは魔法少女になりたい、はるとはVRゲームをつくりたい。ふたりの夢がつながって、家族でハイタッチ" style="width:100%;display:block"></section>' +
     '<p class="muted" style="margin-top:4px;font-size:12px;line-height:1.6">※生成イメージの例です。家族のアバターで、会話の場面を 1枚の絵にします。</p>' +
     '<p class="muted" style="font-size:13px">保存する前に、家族で 絵を確認してね。残したくない回は 残さなくて大丈夫。</p>' +
-    '<button class="btn" data-a="saveRec">アルバムに 保存</button><button class="btn ghost" data-a="discard">この回は 残さない</button></div>';
+    '<button class="btn" data-a="saveRec">アルバムに 保存</button>' +
+    '<button class="btn pink" style="height:54px;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px" data-a="openShare">' + svg('share', 20, null, 2.6) + 'シェアする</button><button class="btn ghost" data-a="discard">この回は 残さない</button></div>';
 };
 V.album = function () {
   if (!isSub()) return '<div class="col">' + locked('アルバムは サブスク会員の機能です', 'グラレコを ためて、毎月の ショートアニメ（買い切り）も 作れます。', '保護者ページで プランを見る') + '</div>';
@@ -364,6 +368,51 @@ V.parent = function () {
   return h;
 };
 
+
+var SHARE = [
+  { k: 'line', label: 'LINE', bg: '#06C755', fg: '#FFFFFF', d: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 4v-4H6a2 2 0 0 1-2-2z' },
+  { k: 'insta', label: 'Instagram', bg: '#E1306C', fg: '#FFFFFF', d: 'M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6zM16.5 7.5h.01' },
+  { k: 'x', label: 'X', bg: '#F4F2FF', fg: '#15132B', d: 'M5 5l14 14M19 5L5 19' },
+  { k: 'save', label: '画像を保存', bg: '#C6F432', fg: '#15132B', d: 'M12 4v11M7 10l5 5 5-5M5 20h14' },
+  { k: 'other', label: 'その他', bg: '#4A4680', fg: '#FFFFFF', d: 'M12 15V4M8 8l4-4 4 4M5 12v7h14v-7' }
+];
+var SHARE_TEXT = 'うちの家族のグラレコ #ファミレコ #将来と夢';
+function shareSheet() {
+  var h = '<div style="position:absolute;inset:0;background:rgba(8,7,20,.72);display:flex;align-items:flex-end;z-index:5" data-a="closeShare" data-k="backdrop">' +
+    '<section role="dialog" aria-modal="true" aria-label="グラレコを シェア" style="width:100%;background:#1C1A3A;border-top:1px solid var(--line);border-radius:28px 28px 0 0;padding:18px 20px 30px;display:flex;flex-direction:column;gap:16px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between"><h2 style="font-size:18px">グラレコを シェア</h2><button class="iconbtn" data-a="closeShare" aria-label="とじる">' + svg('close', 18, null, 2.6) + '</button></div>' +
+    '<div class="row" style="cursor:default"><img src="' + IMG.vr + '" alt=""><span style="display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;font-weight:700">うちの家族の グラレコ</span><span style="font-size:13px;font-weight:900;color:var(--lime)">#ファミレコ #将来と夢</span></span></div>';
+  if (!S.shareOk) {
+    h += '<div class="col" style="gap:12px"><p style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900">' + svg('lock', 20, '#C6F432') + 'シェアには 保護者の許可が必要です</p>' +
+      '<p class="muted" style="font-size:13px;line-height:1.6">送るのは 家族のアバターで描いた絵だけ。顔写真や 本名、会話の文章は 入りません。</p>' +
+      '<button class="btn" style="height:56px;font-size:16px" data-a="approveShare">保護者が 許可する</button><p class="muted" style="font-size:11px">※実際のアプリでは 保護者の PIN で 許可します</p></div>';
+  } else {
+    h += '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px">';
+    SHARE.forEach(function (g) {
+      h += '<button data-a="shareTo" data-k="' + g.k + '" style="border:none;background:transparent;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:6px;padding:0"><span aria-hidden="true" style="width:52px;height:52px;border-radius:26px;background:' + g.bg + ';display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="' + g.fg + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + g.d + '"/></svg></span><span style="font-size:11px;font-weight:700">' + g.label + '</span></button>';
+    });
+    h += '</div>';
+    if (S.shareMsg) h += '<p role="status" class="notice" style="font-size:13px;background:#1F3A2A;border:1px solid #5EE6B0;color:#BFF5DD">' + esc(S.shareMsg) + '</p>';
+  }
+  return h + '</section></div>';
+}
+function shareTo(k) {
+  var url = location.href.split('#')[0];
+  if (k === 'save') {
+    var a = document.createElement('a'); a.href = IMG.vr; a.download = 'famireco-grareco.jpg'; document.body.appendChild(a); a.click(); a.remove();
+    set({ shareMsg: '画像を 保存しました' }); return;
+  }
+  if (k === 'line') { window.open('https://line.me/R/share?text=' + encodeURIComponent(SHARE_TEXT + ' ' + url), '_blank', 'noopener'); set({ shareMsg: 'LINE の 送る画面を 開きました' }); return; }
+  if (k === 'x') { window.open('https://x.com/intent/post?text=' + encodeURIComponent(SHARE_TEXT) + '&url=' + encodeURIComponent(url), '_blank', 'noopener'); set({ shareMsg: 'X の 投稿画面を 開きました' }); return; }
+  if (k === 'insta') { set({ shareMsg: 'Instagram は「画像を保存」してから アプリで 投稿してね' }); return; }
+  fetch(IMG.vr).then(function (r) { return r.blob(); }).then(function (b) {
+    var file = new File([b], 'famireco-grareco.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], text: SHARE_TEXT }).then(function () { set({ shareMsg: '共有しました' }); });
+    if (navigator.share) return navigator.share({ text: SHARE_TEXT, url: url }).then(function () { set({ shareMsg: '共有しました' }); });
+    set({ shareMsg: 'このブラウザは 共有メニューに 対応していません。「画像を保存」を 使ってね' });
+  }).catch(function () { set({ shareMsg: '共有を キャンセルしました' }); });
+}
+
 function render() {
   var scr = S.screen;
   var backTo = { members: 'home', roulette: 'members', grareco: 'result', anime: 'album', photo: S.photoFrom, pin: 'home' }[scr];
@@ -378,6 +427,7 @@ function render() {
     });
     h += '</nav>';
   }
+  if (S.shareOpen) h += shareSheet();
   document.getElementById('app').innerHTML = h;
   document.querySelectorAll('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.k === S.plan)); });
 }
@@ -418,6 +468,10 @@ var A = {
   nextTopic: function () { go('roulette', { cat: -1 }); },
   finish: function () { go('analyzing'); clearTimeout(finishTimer); finishTimer = setTimeout(function () { go('result'); }, 1800); },
   toGrareco: function () { go('grareco'); },
+  openShare: function () { set({ shareOpen: true, shareMsg: '' }); },
+  closeShare: function () { set({ shareOpen: false, shareMsg: '' }); },
+  approveShare: function () { set({ shareOk: true }); },
+  shareTo: shareTo,
   saveRec: function () { go('album', { saved: true, justSaved: true }); },
   discard: function () { go('home', { saved: false, notice: 'この回の グラレコは 残しませんでした' }); },
   goHome: function () { go('home'); },
@@ -440,6 +494,7 @@ var A = {
 document.addEventListener('click', function (e) {
   var b = e.target.closest('[data-a]');
   if (!b || b.disabled) return;
+  if (b.dataset.k === 'backdrop' && e.target !== b) return;
   e.preventDefault();
   A[b.dataset.a](b.dataset.k);
 });
