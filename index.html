@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>かぞくトーク プロトタイプ</title>
-<meta name="description" content="親子の会話を習慣にする「かぞくトーク」のプロトタイプ。お題ルーレット、盛り上がりスコア、グラレコ、月次ショートアニメ。">
+<title>ファミレコ プロトタイプ</title>
+<meta name="description" content="親子の会話を習慣にする「ファミレコ」のプロトタイプ。お題ルーレット、盛り上がりスコア、グラレコ、月次ショートアニメ。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Yomogi&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
@@ -103,7 +103,7 @@ var PEOPLE = [
   { id: 'haru', name: 'はると', sub: '中1', short: 'は', bg: '#5CC8FF' },
   { id: 'yui', name: 'ゆい', sub: '小5', short: 'ゆ', bg: '#FF7EB6' }
 ];
-var TITLES = { home: 'かぞくトーク', members: 'メンバー', roulette: 'お題ルーレット', talk: 'トーク中', analyzing: 'ふりかえり中', result: '今日のスコア', grareco: 'グラレコ', album: 'アルバム', anime: 'ショートアニメ', photo: 'グラレコ', pin: '保護者ページ', parent: '保護者ページ' };
+var TITLES = { home: 'ファミレコ', members: 'メンバー', roulette: 'お題ルーレット', talk: 'トーク中', analyzing: 'ふりかえり中', result: '今日のスコア', grareco: 'グラレコ', album: 'アルバム', anime: 'ショートアニメ', photo: 'グラレコ', pin: '保護者ページ', parent: '保護者ページ' };
 var SCENE_BG = ['#FFE3CC', '#E4DEFF', '#FFF1BF', '#FFE0EC', '#D9F0FF', '#D6F7E8', '#F0FFC9'];
 var ICON = {
   back: '<path d="M15 6l-6 6 6 6"/>',
@@ -173,7 +173,7 @@ V.home = function () {
     '<svg aria-hidden="true" style="position:absolute;right:-28px;top:-28px" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="#8B7BFF" stroke-width="14" opacity=".55"/><circle cx="75" cy="75" r="28" fill="#FF5FA2" opacity=".85"/></svg>' +
     '<p class="label">NEXT TALK</p><p class="disp" style="font-size:30px;line-height:1.25;position:relative">金曜日<br>20:00</p><p class="muted" style="margin-top:4px;font-size:14px">夕ごはんのあと、15分だけ話そう</p></section>';
   if (!isSub()) h += '<p class="muted" style="font-size:14px;text-align:center">無料プラン：今月のこり <strong style="color:var(--lime);font-weight:900">' + S.freeLeft + ' / 4 回</strong></p>';
-  h += '<button class="btn big" data-a="start" style="display:flex;align-items:center;justify-content:center;gap:10px">かぞくトークを はじめる ' + svg('arrow', 22, null, 2.8) + '</button>';
+  h += '<button class="btn big" data-a="start" style="display:flex;align-items:center;justify-content:center;gap:10px">トークを はじめる ' + svg('arrow', 22, null, 2.8) + '</button>';
   h += '<section class="grid2">' +
     '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">' + svg('flame', 16, '#FF9F5A') + '今月 話した回数</p><p class="disp" style="font-size:30px">' + (S.saved ? 4 : 3) + '<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 回</span></p></div>' +
     '<div class="card" style="padding:16px;border-radius:20px;display:flex;flex-direction:column;gap:6px"><p class="muted" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C6F432" aria-hidden="true">' + ICON.star + '</svg>家族スコア 平均</p><p class="disp" style="font-size:30px">78<span class="muted" style="font-family:inherit;font-size:14px;font-weight:700"> 点</span></p></div></section>';
